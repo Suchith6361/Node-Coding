@@ -20,11 +20,11 @@ app.get("/api/user", (req, res) => {
 });
 
 app.post("/NewUser", (req, res) => {
-  const details = req.body;
-  console.log(details);
+  const {name,role,age} = req.body;
+  console.log({name,role,age});
   res.status(201).json({
     message: "User Created successfully",
-    user: details,
+    user: {name,role,age},
   });
 });
 
