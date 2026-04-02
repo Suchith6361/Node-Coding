@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const db=require("./db");
 
 app.use(express.json());
 app.use(Logger);   // middleware first
@@ -41,11 +42,17 @@ const users = [];
 app.post("/signup", (req, res) => {
   const { email, password, role } = req.body;
 
-  users.push({ email, password, role });
+ const query="Insert into users (email,password,role) values (?,?,?)";
+
+   db.query(query, [email, password, role], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
 
   res.json({
     message: "User registered successfully",
     user: { email, role }
+    });
   });
 
 });
@@ -54,29 +61,32 @@ app.post("/signup", (req, res) => {
 function checkRole(req,res,next){
   const {email,password}=req.body;
 
-  const user=users.find(
-    u=>u.email===email && u.password===password
-  )
-  if(!user){
-    return res.status(401).json({
-      message:"Invalid credentials"
-    })
-  }
-  req.user=user;
+  const query = "SELECT * FROM users WHERE email = ? AND password = ?";
+
+  db.query(query, [email, password], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+  req.users=results[0];
   next();
+  });
 }
 
 /* Signin Route */
 app.post("/signin", checkRole, (req, res) => {
 
-  if (req.user.role === "admin") {
+  if (req.users.role === "admin") {
     return res.json({
       message: "Welcome Admin! You have full access."
       
     });
   }
 
-  if (req.user.role === "manager") {
+  if (req.users.role === "manager") {
     return res.json({
       message: "Welcome Manager! You have limited access."
     });
