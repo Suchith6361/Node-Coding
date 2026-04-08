@@ -36,44 +36,46 @@ app.post("/NewUser", (req, res) => {
 });
 
 /* Fake database */
-const users = [];
+// const users = [];
 
 /* Signup Route */
-app.post("/signup", (req, res) => {
-  const { email, password, role } = req.body;
+app.post("/signup", async (req, res) => {
+  try {
+    const { email, password, role } = req.body;
 
- const query="Insert into users (email,password,role) values (?,?,?)";
+    const query = "INSERT INTO users (email,password,role) VALUES (?,?,?)";
 
-   db.query(query, [email, password, role], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
+    const [result] = await db.query(query, [email, password, role]);
 
-  res.json({
-    message: "User registered successfully",
-    user: { email, role }
+    res.json({
+      message: "User registered successfully",
+      user: { email, role }
     });
-  });
 
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /* Role Middleware */
-function checkRole(req,res,next){
-  const {email,password}=req.body;
+async function checkRole(req, res, next) {
+  try {
+    const { email, password } = req.body;
 
-  const query = "SELECT * FROM users WHERE email = ? AND password = ?";
+    const query = "SELECT * FROM users WHERE email = ? AND password = ?";
 
-  db.query(query, [email, password], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
+    const [results] = await db.query(query, [email, password]);
 
     if (results.length === 0) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-  req.users=results[0];
-  next();
-  });
+
+    req.users = results[0];
+    next();
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 /* Signin Route */
