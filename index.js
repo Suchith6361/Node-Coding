@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const db=require("./db");
+const db=require("./database/db");
 
 app.use(express.json());
 app.use(Logger);   // middleware first
@@ -98,6 +98,17 @@ app.post("/signin", checkRole, (req, res) => {
     message: "Unknown role"
   });
 });
+
+app.get("/users",async(req,res)=>{
+  try{
+  const query="SELECT id,email,role FROM users"
+  const [results]=await db.query(query);
+  res.json(results);
+  }
+  catch(err){
+    res.status(500).json({error:err.message});
+  }
+})
 
 
 // Route Parameters and Query Parameters
