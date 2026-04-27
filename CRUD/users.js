@@ -1,17 +1,19 @@
 const express = require("express");
 const app = express.Router();
 const db = require("../database/db");
+const bcrypt=require("bcrypt");
  
-
 
 /* Signup Route */
 app.post("/signup", async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
+    const hashedPassword = await bcrypt.hash(password,10);
+
     const query = "INSERT INTO users (email,password,role) VALUES (?,?,?)";
 
-    const [result] = await db.query(query, [email, password, role]);
+    await db.query(query, [email, hashedPassword, role]);
 
     res.json({
       message: "User registered successfully",
@@ -28,19 +30,36 @@ async function checkRole(req, res, next) {
   try {
     const { email, password } = req.body;
 
-    const query = "SELECT * FROM users WHERE email = ? AND password = ?";
+    // Find user only by email
+    const query = "SELECT * FROM users WHERE email = ?";
 
-    const [results] = await db.query(query, [email, password]);
+    const [results] = await db.query(query, [email]);
 
     if (results.length === 0) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(404).json({
+        message: "User not found"
+      });
     }
 
-    req.user = results[0];
+    const user = results[0];
+
+    // Compare entered password with hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid password"
+      });
+    }
+
+    req.user = user;
+
     next();
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 }
 

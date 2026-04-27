@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const db=require("./database/db");
+require("dotenv").config();
 
 const userRoutes=require("./CRUD/users");
 
