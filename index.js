@@ -1,18 +1,18 @@
 const express = require("express");
 const app = express();
-const db=require("./database/db");
+const db = require("./database/db");
 require("dotenv").config();
 
-const userRoutes=require("./CRUD/users");
+const userRoutes = require("./CRUD/users");
 
 app.use(express.json());
-app.use(Logger);   // middleware first
+app.use(Logger); // middleware first
 
-app.use("/api", userRoutes);  // Mount the user routes at /api
+app.use("/api", userRoutes); // Mount the user routes at /api
 
-function Logger(req,res,next){
+function Logger(req, res, next) {
   console.log(`${req.method} ${req.url}`);
-  next(); 
+  next();
 }
 
 app.get("/", (req, res) => {
@@ -32,17 +32,16 @@ app.get("/user", (req, res) => {
 });
 
 app.post("/NewUser", (req, res) => {
-  const {name,role,age} = req.body;
-  console.log({name,role,age});
+  const { name, role, age } = req.body;
+  console.log({ name, role, age });
   res.status(201).json({
     message: "User Created successfully",
-    user: {name,role,age},
+    user: { name, role, age },
   });
 });
 
 /* Fake database */
 // const users = [];
-
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");
