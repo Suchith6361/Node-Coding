@@ -2,6 +2,7 @@ const express = require("express");
 const app = express.Router();
 const db = require("../database/db");
 const bcrypt=require("bcrypt");
+const jwt=require("jsonwebtoken");
  
 
 /* Signup Route */
@@ -63,25 +64,81 @@ async function checkRole(req, res, next) {
   }
 }
 
+function verifyToken(req, res, next) {
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(403).json({
+      message: "No token provided"
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    req.user = decoded;
+
+    next();
+
+  } catch (err) {
+
+    return res.status(401).json({
+      message: "Invalid token"
+    });
+
+  }
+}
+
 /* Signin Route */
 app.post("/signin", checkRole, (req, res) => {
 
+  const token = jwt.sign(
+    {
+      id: req.user.id,
+      email: req.user.email,
+      role: req.user.role
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1h"
+    }
+  );
+
   if (req.user.role === "admin") {
     return res.json({
-      message: "Welcome Admin! You have full access."
-      
+      message: "Welcome Admin! You have full access.",
+      token
     });
   }
 
   if (req.user.role === "manager") {
     return res.json({
-      message: "Welcome Manager! You have limited access."
+      message: "Welcome Manager! You have limited access.",
+      token
     });
   }
 
   res.json({
-    message: "Unknown role"
+    message: "Unknown role",
+    token
   });
+
+});
+
+app.get("/profile", verifyToken, (req, res) => {
+
+  res.json({
+    message: "Protected route",
+    user: req.user
+  });
+
 });
 
 app.get("/users",async(req,res)=>{
