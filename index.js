@@ -1,19 +1,19 @@
-const express = require("express");
-const app = express();
-const db = require("./database/db");
-require("dotenv").config();
+import express from "express";
+import dotenv from "dotenv";
 
-const userRoutes = require("./CRUD/users");
+import Logger from "./Middleware/logger.js";
+
+import userRoutes from "./routes/userRoutes.js";
+
+dotenv.config();
+
+const app = express();
 
 app.use(express.json());
-app.use(Logger); // middleware first
 
-app.use("/api", userRoutes); // Mount the user routes at /api
+app.use(Logger);
 
-function Logger(req, res, next) {
-  console.log(`${req.method} ${req.url}`);
-  next();
-}
+app.use("/api", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello Welcome to Express.js! This is the home page.");

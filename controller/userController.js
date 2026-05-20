@@ -1,11 +1,9 @@
-const express = require("express");
-const app = express.Router();
-const db = require("../database/db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import db from "../config/db.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-/* Signup Route */
-app.post("/signup", async (req, res) => {
+// signup Controller
+export const signup = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
@@ -22,71 +20,10 @@ app.post("/signup", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-/* Role Middleware */
-async function checkRole(req, res, next) {
-  try {
-    const { email, password } = req.body;
-
-    // Find user only by email
-    const query = "SELECT * FROM users WHERE email = ?";
-
-    const [results] = await db.query(query, [email]);
-
-    if (results.length === 0) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    const user = results[0];
-
-    // Compare entered password with hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({
-        message: "Invalid password",
-      });
-    }
-
-    req.user = user;
-
-    next();
-  } catch (err) {
-    res.status(500).json({
-      error: err.message,
-    });
-  }
-}
-
-function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(403).json({
-      message: "No token provided",
-    });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded;
-
-    next();
-  } catch (err) {
-    return res.status(401).json({
-      message: "Invalid token",
-    });
-  }
-}
-
-/* Signin Route */
-app.post("/signin", checkRole, (req, res) => {
+// signin Controller
+export const signin = async (req, res) => {
   const token = jwt.sign(
     {
       id: req.user.id,
@@ -117,16 +54,18 @@ app.post("/signin", checkRole, (req, res) => {
     message: "Unknown role",
     token,
   });
-});
+};
 
-app.get("/profile", verifyToken, (req, res) => {
+// profile Controller
+export const profile = async (req, res) => {
   res.json({
     message: "Protected route",
     user: req.user,
   });
-});
+};
 
-app.get("/users", async (req, res) => {
+//get all users Controller
+export const users = async (req, res) => {
   try {
     const query = "SELECT id,email,role FROM users";
     const [results] = await db.query(query);
@@ -134,10 +73,10 @@ app.get("/users", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Route Parameters and Query Parameters
-app.get("/users/:id", async (req, res) => {
+// get user by id Controller
+export const getUserById = async (req, res) => {
   try {
     const id = req.params.id; // Route parameter
     const role = req.query.role; // Query parameter
@@ -160,10 +99,10 @@ app.get("/users/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Body Parameters
-app.put("/users/:id", async (req, res) => {
+// update user by id Controller
+export const updateUserById = async (req, res) => {
   try {
     const id = req.params.id;
     const { email } = req.body;
@@ -176,10 +115,10 @@ app.put("/users/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-// Delete User
-app.delete("/users/:id", async (req, res) => {
+// delete user by id Controller
+export const deleteUserById = async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -195,6 +134,4 @@ app.delete("/users/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
-
-module.exports = app;
+};
