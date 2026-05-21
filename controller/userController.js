@@ -1,11 +1,18 @@
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import signupSchema  from "../validation/authValidator.js";
 
 // signup Controller
 export const signup = async (req, res) => {
   try {
     const { email, password, role } = req.body;
+
+    // Validate request body
+    const { error } = signupSchema.validate({ email, password, role });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
