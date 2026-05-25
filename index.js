@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import errorHandler from "./Middleware/errorHandler.js";
 
 import Logger from "./Middleware/logger.js";
 
@@ -14,6 +15,9 @@ app.use(express.json());
 app.use(Logger);
 
 app.use("/api", userRoutes);
+
+// GLOBAL ERROR HANDLER MUST BE LAST
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.send("Hello Welcome to Express.js! This is the home page.");

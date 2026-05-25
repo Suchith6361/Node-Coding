@@ -2,9 +2,10 @@ import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import signupSchema  from "../validation/authValidator.js";
+import errorHandler from "../Middleware/errorHandler.js";
 
 // signup Controller
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
 
@@ -24,8 +25,11 @@ export const signup = async (req, res) => {
       message: "User registered successfully",
       user: { email, role },
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } 
+
+  // Global error handling using next() to pass the error to the error handler middleware
+  catch(error){
+    next(error);
   }
 };
 
