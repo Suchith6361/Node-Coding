@@ -6,19 +6,21 @@ import { signup, signin, profile ,users, getUserById, updateUserById, deleteUser
 
 import { checkRole, verifyToken } from "../Middleware/authMiddleware.js";
 
+import {isAdmin} from '../Middleware/roleMiddleware.js'
+
 router.post("/signup", signup);
 
 router.post("/signin", checkRole, signin);
 
 router.get("/profile", verifyToken, profile);
 
-router.get("/users", users);
+router.get("/users",verifyToken,isAdmin, users);
 
 router.get("/users/:id", getUserById);
 
-router.post("/users/:id", updateUserById);  
+router.put("/users/:id", updateUserById);  
 
-router.delete("/users/:id", deleteUserById);
+router.delete("/users/:id",verifyToken,isAdmin, deleteUserById);
 
 
 

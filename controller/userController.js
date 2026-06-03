@@ -2,7 +2,6 @@ import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import signupSchema  from "../validation/authValidator.js";
-import errorHandler from "../Middleware/errorHandler.js";
 
 // signup Controller
 export const signup = async (req, res, next) => {
