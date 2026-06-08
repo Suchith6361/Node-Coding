@@ -2,7 +2,7 @@ import express from "express";
 
 const router = express.Router();
 
-import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById } from "../controller/userController.js";
+import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById ,filterUsers } from "../controller/userController.js";
 
 import { checkRole, verifyToken } from "../Middleware/authMiddleware.js";
 
@@ -21,6 +21,8 @@ router.get("/users/:id", getUserById);
 router.put("/users/:id", updateUserById);  
 
 router.delete("/users/:id",verifyToken,isAdmin, deleteUserById);
+
+router.get("/filter-users", filterUsers);
 
 
 

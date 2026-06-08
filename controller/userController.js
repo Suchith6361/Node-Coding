@@ -79,7 +79,7 @@ export const users = async (req, res, next) => {
     const limit = Number(req.query.limit) || 5;
 
     const offset = (page - 1) * limit;
-
+    
     const [[countResult]] = await db.query(
       "SELECT COUNT(*) AS total FROM users",
     );
@@ -101,6 +101,30 @@ export const users = async (req, res, next) => {
     next(error);
   }
 };
+
+// filter users Controller
+export const filterUsers = async(req,res)=>{
+  try{
+   const role=req.query.role;
+
+   let query="select * from users";
+
+   const values=[];
+
+   if(role){
+     query=query+" where role=?";
+     values.push(role);
+   }
+
+   const [results]=await db.query(query,values);
+
+   res.json(results);
+
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+}
 
 // get user by id Controller
 export const getUserById = async (req, res) => {
