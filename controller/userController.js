@@ -1,7 +1,7 @@
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import signupSchema  from "../validation/authValidator.js";
+import signupSchema from "../validation/authValidator.js";
 
 // signup Controller
 export const signup = async (req, res, next) => {
@@ -24,10 +24,8 @@ export const signup = async (req, res, next) => {
       message: "User registered successfully",
       user: { email, role },
     });
-  } 
-
-  // Global error handling using next() to pass the error to the error handler middleware
-  catch(error){
+  } catch (error) {
+    // Global error handling using next() to pass the error to the error handler middleware
     next(error);
   }
 };
@@ -75,13 +73,32 @@ export const profile = async (req, res) => {
 };
 
 //get all users Controller
-export const users = async (req, res) => {
+export const users = async (req, res, next) => {
   try {
-    const query = "SELECT id,email,role FROM users";
-    const [results] = await db.query(query);
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+
+    const offset = (page - 1) * limit;
+
+    const [[countResult]] = await db.query(
+      "SELECT COUNT(*) AS total FROM users",
+    );
+
+    const totalUsers = countResult.total;
+
+    const [results] = await db.query(
+      "SELECT id,email,role FROM users LIMIT ? OFFSET ?",[limit, offset]
+    );
+
+    res.json({
+      page,
+      limit,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      data: results,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
