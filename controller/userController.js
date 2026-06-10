@@ -126,6 +126,32 @@ export const filterUsers = async(req,res)=>{
   }
 }
 
+
+// Sort users Controller
+export const sortUsers = async(req,res)=>{
+  try{
+   const sortby=req.query.sortby || 'id';
+    
+   let query = "SELECT * FROM users";
+
+    if (sortby === "asc") {
+      query += " ORDER BY id asc";
+    }
+
+    if (sortby === "desc") {
+      query += " ORDER BY id DESC";
+    }
+
+   const[results]=await db.query(query);
+
+   res.json(results);
+  
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+}
+
 // get user by id Controller
 export const getUserById = async (req, res) => {
   try {
