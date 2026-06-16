@@ -212,3 +212,16 @@ export const deleteUserById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// upload profile picture Controller
+export const uploadImage = (req, res) => {
+
+  console.log(req.file);
+
+  res.json({
+    message: "File uploaded successfully",
+    file: req.file
+  });
+
+};
