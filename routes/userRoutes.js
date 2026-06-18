@@ -2,7 +2,7 @@ import express from "express";
 
 const router = express.Router();
 
-import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById ,filterUsers,sortUsers ,uploadImage} from "../controller/userController.js";
+import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById ,filterUsers,sortUsers ,uploadImage ,signupTransaction} from "../controller/userController.js";
 
 import { checkRole, verifyToken } from "../Middleware/authMiddleware.js";
 
@@ -29,5 +29,7 @@ router.get("/filter_users", filterUsers);
 router.get("/sort_users", sortUsers);
 
 router.post("/upload",multer.single('image'), uploadImage);
+
+router.post("/signup_transaction",signupTransaction);
 
 export default router;

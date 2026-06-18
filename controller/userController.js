@@ -79,7 +79,7 @@ export const users = async (req, res, next) => {
     const limit = Number(req.query.limit) || 5;
 
     const offset = (page - 1) * limit;
-    
+
     const [[countResult]] = await db.query(
       "SELECT COUNT(*) AS total FROM users",
     );
@@ -87,7 +87,8 @@ export const users = async (req, res, next) => {
     const totalUsers = countResult.total;
 
     const [results] = await db.query(
-      "SELECT id,email,role FROM users LIMIT ? OFFSET ?",[limit, offset]
+      "SELECT id,email,role FROM users LIMIT ? OFFSET ?",
+      [limit, offset],
     );
 
     res.json({
@@ -103,36 +104,33 @@ export const users = async (req, res, next) => {
 };
 
 // filter users Controller
-export const filterUsers = async(req,res)=>{
-  try{
-   const role=req.query.role;
+export const filterUsers = async (req, res) => {
+  try {
+    const role = req.query.role;
 
-   let query="select * from users";
+    let query = "select * from users";
 
-   const values=[];
+    const values = [];
 
-   if(role){
-     query=query+" where role=?";
-     values.push(role);
-   }
+    if (role) {
+      query = query + " where role=?";
+      values.push(role);
+    }
 
-   const [results]=await db.query(query,values);
+    const [results] = await db.query(query, values);
 
-   res.json(results);
-
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  catch(err){
-    res.status(500).json({error:err.message})
-  }
-}
-
+};
 
 // Sort users Controller
-export const sortUsers = async(req,res)=>{
-  try{
-   const sortby=req.query.sortby || 'id';
-    
-   let query = "SELECT * FROM users";
+export const sortUsers = async (req, res) => {
+  try {
+    const sortby = req.query.sortby || "id";
+
+    let query = "SELECT * FROM users";
 
     if (sortby === "asc") {
       query += " ORDER BY id asc";
@@ -142,15 +140,13 @@ export const sortUsers = async(req,res)=>{
       query += " ORDER BY id DESC";
     }
 
-   const[results]=await db.query(query);
+    const [results] = await db.query(query);
 
-   res.json(results);
-  
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  catch(err){
-    res.status(500).json({error:err.message})
-  }
-}
+};
 
 // get user by id Controller
 export const getUserById = async (req, res) => {
@@ -213,15 +209,58 @@ export const deleteUserById = async (req, res) => {
   }
 };
 
-
 // upload profile picture Controller
 export const uploadImage = (req, res) => {
-
   console.log(req.file);
 
   res.json({
     message: "File uploaded successfully",
-    file: req.file
+    file: req.file,
   });
+};
 
+// signup controller with database transaction
+
+export const signupTransaction = async (req, res, next) => {
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const { email, password, role } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [userResult] = await connection.query(
+      `
+        INSERT INTO users
+        (email,password,role)
+        VALUES (?,?,?)
+        `,
+      [email, hashedPassword, role],
+    );
+
+    const userId = userResult.insertId;
+
+    await connection.query(
+      `
+      INSERT INTO profiles
+      (user_id,bio)
+      VALUES (?,?)
+      `,
+      [userId, "New User"],
+    );
+
+    await connection.commit();
+
+    res.json({
+      message: "User and Profile created",
+    });
+  } catch (error) {
+    await connection.rollback();
+
+    next(error);
+  } finally {
+    connection.release();
+  }
 };
