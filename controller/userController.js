@@ -264,3 +264,14 @@ export const signupTransaction = async (req, res, next) => {
     connection.release();
   }
 };
+
+// Get all users for Public route
+export const publicUsers = async (req, res, next) => {
+  try {
+    const [results] = await db.query("SELECT id,email,role FROM users");
+
+    res.json(results);
+  } catch (error) {
+    next(error);
+  }
+};

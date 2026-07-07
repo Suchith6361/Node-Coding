@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import errorHandler from "./Middleware/errorHandler.js";
+import cors from "cors";
 
 import Logger from "./Middleware/logger.js";
 
@@ -11,7 +12,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-
+app.use(cors());
 app.use(Logger);
 
 app.use("/api", userRoutes);

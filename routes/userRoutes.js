@@ -2,7 +2,7 @@ import express from "express";
 
 const router = express.Router();
 
-import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById ,filterUsers,sortUsers ,uploadImage ,signupTransaction} from "../controller/userController.js";
+import { signup, signin, profile ,users, getUserById, updateUserById, deleteUserById ,filterUsers,sortUsers ,uploadImage ,signupTransaction,publicUsers} from "../controller/userController.js";
 
 import { checkRole, verifyToken } from "../Middleware/authMiddleware.js";
 
@@ -17,6 +17,8 @@ router.post("/signin", checkRole, signin);
 router.get("/profile", verifyToken, profile);
 
 router.get("/users",verifyToken,isAdmin, users);
+
+router.get("/public_users", publicUsers);
 
 router.get("/users/:id", getUserById);
 
