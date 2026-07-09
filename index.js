@@ -2,16 +2,17 @@ import express from "express";
 import dotenv from "dotenv";
 import errorHandler from "./Middleware/errorHandler.js";
 import cors from "cors";
-
 import Logger from "./Middleware/logger.js";
-
+import helmet from "helmet";
 import userRoutes from "./routes/userRoutes.js";
+
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+app.use(helmet());
 app.use(cors());
 app.use(Logger);
 
@@ -48,6 +49,6 @@ app.post("/NewUser", (req, res) => {
 /* Fake database */
 // const users = [];
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(3001, () => {
+  console.log("Server running on port 3001");
 });
