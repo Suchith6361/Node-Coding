@@ -10,6 +10,8 @@ import {isAdmin} from '../Middleware/roleMiddleware.js'
 
 import multer from '../Middleware/uplaodMiddleware.js'
 
+import Limiter from "../Middleware/rateLimit.js";
+
 router.post("/signup", signup);
 
 router.post("/signin", checkRole, signin);
@@ -18,7 +20,7 @@ router.get("/profile", verifyToken, profile);
 
 router.get("/users",verifyToken,isAdmin, users);
 
-router.get("/public_users", publicUsers);
+router.get("/public_users",Limiter, publicUsers);
 
 router.get("/users/:id", getUserById);
 

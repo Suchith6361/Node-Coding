@@ -5,6 +5,7 @@ import cors from "cors";
 import Logger from "./Middleware/logger.js";
 import helmet from "helmet";
 import userRoutes from "./routes/userRoutes.js";
+import limiter from "./Middleware/rateLimit.js";
 
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(Logger);
+//app.use(limiter);  only use here when we need to use rate limit for all routes, otherwise use in specific route
 
 app.use("/api", userRoutes);
 
