@@ -16,7 +16,6 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
-app.use(Logger);
 app.use(morgan("dev"));
 //app.use(limiter);  only use here when we need to use rate limit for all routes, otherwise use in specific route
 

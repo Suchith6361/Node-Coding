@@ -1,9 +1,17 @@
-const Logger = (req, res, next) => {
+import winston from "winston";
 
-  console.log(`${req.method} ${req.url}`);
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.simple(),
+  transports: [
+    // Console
+    new winston.transports.Console(),
 
-  next();
+    // Save logs to a file
+    new winston.transports.File({
+      filename: "logs/app.log",
+    }),
+  ],
+});
 
-};
-
-export default Logger;
+export default logger;

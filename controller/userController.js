@@ -2,6 +2,7 @@ import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import signupSchema from "../validation/authValidator.js";
+import logger from "../Middleware/logger.js"
 
 // signup Controller
 export const signup = async (req, res, next) => {
@@ -20,11 +21,13 @@ export const signup = async (req, res, next) => {
 
     await db.query(query, [email, hashedPassword, role]);
 
+    logger.info("User registered successfully");
     res.json({
       message: "User registered successfully",
       user: { email, role },
     });
   } catch (error) {
+    logger.error("Error occurred while registering user");
     // Global error handling using next() to pass the error to the error handler middleware
     next(error);
   }
